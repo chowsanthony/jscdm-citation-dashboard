@@ -1,0 +1,5 @@
+{
+  "name": "JSCDM Editorial Dashboard",
+  "description": "An interactive dashboard for the Journal of the Society for Clinical Data Management editorial board to analyze publication impact and citation metrics.",
+  "requestFramePermissions": []
+}
