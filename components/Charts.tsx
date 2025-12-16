@@ -12,56 +12,10 @@ import {
 } from 'recharts';
 import { SectionStat, Publication } from '../types';
 
-interface SectionPerformanceChartProps {
-  data: SectionStat[];
-}
-
-export const SectionPerformanceChart: React.FC<SectionPerformanceChartProps> = ({ data }) => {
-  return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 h-96">
-      <h3 className="text-lg font-bold text-slate-800 mb-4">Citation Impact by Section</h3>
-      <ResponsiveContainer width="100%" height="90%">
-        <BarChart
-          data={data}
-          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-          <XAxis 
-            dataKey="name" 
-            tick={{ fill: '#64748b', fontSize: 12 }}
-            axisLine={false}
-            tickLine={false}
-            interval={0}
-            angle={-45}
-            textAnchor="end"
-            height={80}
-          />
-          <YAxis 
-            tick={{ fill: '#64748b', fontSize: 12 }} 
-            axisLine={false}
-            tickLine={false}
-          />
-          <Tooltip 
-            cursor={{ fill: '#f1f5f9' }}
-            contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-          />
-          <Legend wrapperStyle={{ paddingTop: '20px' }}/>
-          <Bar name="Total Citations" dataKey="citations" fill="#4f46e5" radius={[4, 4, 0, 0]} />
-          <Bar name="Avg Citations / Paper" dataKey="avgCitations" fill="#93c5fd" radius={[4, 4, 0, 0]} />
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
-  );
-};
-
-interface TopNReportProps {
-  data: Publication[];
-  n?: number;
-}
-
-const CustomYAxisTick = ({ x, y, payload }: any) => {
+// Shared Custom Y Axis Tick Component for consistent truncation
+// Now accepts a maxLength prop to handle different chart widths
+const CustomYAxisTick = ({ x, y, payload, maxLength = 35 }: any) => {
   const fullTitle = payload.value as string;
-  const maxLength = 35;
   const displayTitle = fullTitle.length > maxLength 
     ? `${fullTitle.substring(0, maxLength)}...` 
     : fullTitle;
@@ -83,6 +37,54 @@ const CustomYAxisTick = ({ x, y, payload }: any) => {
     </g>
   );
 };
+
+interface SectionPerformanceChartProps {
+  data: SectionStat[];
+}
+
+export const SectionPerformanceChart: React.FC<SectionPerformanceChartProps> = ({ data }) => {
+  return (
+    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 h-[32rem]">
+      <h3 className="text-lg font-bold text-slate-800 mb-4">Citation Impact by Section</h3>
+      <ResponsiveContainer width="100%" height="90%">
+        <BarChart
+          layout="vertical"
+          data={data}
+          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" horizontal={false} vertical={true} stroke="#e2e8f0" />
+          <XAxis 
+            type="number"
+            tick={{ fill: '#64748b', fontSize: 12 }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <YAxis 
+            dataKey="name" 
+            type="category"
+            tick={(props) => <CustomYAxisTick {...props} maxLength={25} />}
+            width={180} 
+            axisLine={false}
+            tickLine={false}
+            interval={0} 
+          />
+          <Tooltip 
+            cursor={{ fill: '#f1f5f9' }}
+            contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+          />
+          <Legend wrapperStyle={{ paddingTop: '10px' }}/>
+          <Bar name="Total Citations" dataKey="citations" fill="#4f46e5" radius={[0, 4, 4, 0]} barSize={12} />
+          <Bar name="Avg Citations / Paper" dataKey="avgCitations" fill="#93c5fd" radius={[0, 4, 4, 0]} barSize={12} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+};
+
+interface TopNReportProps {
+  data: Publication[];
+  n?: number;
+}
 
 export const TopNReport: React.FC<TopNReportProps> = ({ data, n = 10 }) => {
   // Sort descending by max_citations and take top N
@@ -107,7 +109,7 @@ export const TopNReport: React.FC<TopNReportProps> = ({ data, n = 10 }) => {
             dataKey="title" 
             type="category" 
             width={250} 
-            tick={<CustomYAxisTick />}
+            tick={(props) => <CustomYAxisTick {...props} maxLength={35} />}
             axisLine={false}
             tickLine={false}
           />
